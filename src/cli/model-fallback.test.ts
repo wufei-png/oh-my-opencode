@@ -14,6 +14,9 @@ function createConfig(overrides: Partial<InstallConfig> = {}): InstallConfig {
     hasZaiCodingPlan: false,
     hasKimiForCoding: false,
     hasOpencodeGo: false,
+    hasMinimaxCnCodingPlan: false,
+    hasMinimaxCodingPlan: false,
+    minimaxModelVariant: "standard",
     ...overrides,
   }
 }
@@ -199,6 +202,17 @@ describe("generateModelConfig", () => {
       // #then should use ZAI_MODEL for librarian
       expect(result).toMatchSnapshot()
     })
+
+    test("uses MiniMax model for explore when only MiniMax Coding Plan is available", () => {
+      // #given only MiniMax Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then should use MiniMax model for explore
+      expect(result.agents?.explore?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.5")
+    })
   })
 
   describe("mixed provider scenarios", () => {
@@ -367,6 +381,125 @@ describe("generateModelConfig", () => {
       // #then explore should use gpt-5-mini (Copilot fallback)
       expect(result.agents?.explore?.model).toBe("github-copilot/gpt-5-mini")
     })
+
+    test("multimodal-looker uses MiniMax when only MiniMax Coding Plan is available", () => {
+      // #given only MiniMax Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then multimodal-looker should use MiniMax
+      expect(result.agents?.["multimodal-looker"]?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.5")
+    })
+  })
+
+  describe("MiniMax fallback coverage", () => {
+    test("prometheus resolves to MiniMax when only MiniMax CN is available", () => {
+      // #given only MiniMax CN Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then prometheus should use MiniMax
+      expect(result.agents?.prometheus?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.5")
+    })
+
+    test("metis resolves to MiniMax when only MiniMax CN is available", () => {
+      // #given only MiniMax CN Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then metis should use MiniMax
+      expect(result.agents?.metis?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.5")
+    })
+
+    test("atlas resolves to MiniMax when only MiniMax CN is available", () => {
+      // #given only MiniMax CN Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then atlas should use MiniMax
+      expect(result.agents?.atlas?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.5")
+    })
+
+    test("visual-engineering resolves to MiniMax when only MiniMax CN is available", () => {
+      // #given only MiniMax CN Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then visual-engineering should use MiniMax
+      expect(result.categories?.["visual-engineering"]?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.5")
+    })
+
+    test("unspecified-high resolves to MiniMax when only MiniMax CN is available with isMax20", () => {
+      // #given only MiniMax CN Coding Plan is available with Max 20 plan
+      const config = createConfig({ hasMinimaxCnCodingPlan: true, isMax20: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then unspecified-high should use MiniMax
+      expect(result.categories?.["unspecified-high"]?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.5")
+    })
+
+    test("writing resolves to MiniMax when only MiniMax CN is available", () => {
+      // #given only MiniMax CN Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then writing should use MiniMax
+      expect(result.categories?.writing?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.5")
+    })
+
+    test("MiniMax minimax.io plan is used when only minimax.io is available", () => {
+      // #given only MiniMax Coding Plan (minimax.io) is available
+      const config = createConfig({ hasMinimaxCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then agents and categories should use MiniMax Coding Plan (minimax.io)
+      expect(result.agents?.sisyphus?.model).toBe("minimax-coding-plan/MiniMax-M2.5")
+      expect(result.agents?.prometheus?.model).toBe("minimax-coding-plan/MiniMax-M2.5")
+      expect(result.agents?.metis?.model).toBe("minimax-coding-plan/MiniMax-M2.5")
+      expect(result.agents?.atlas?.model).toBe("minimax-coding-plan/MiniMax-M2.5")
+      expect(result.categories?.writing?.model).toBe("minimax-coding-plan/MiniMax-M2.5")
+    })
+
+    test("MiniMax highspeed variant is used when configured", () => {
+      // #given minimax.io is available and highspeed is explicitly requested
+      const config = createConfig({ hasMinimaxCodingPlan: true, minimaxModelVariant: "highspeed" })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then the generated models should use MiniMax-M2.5-highspeed
+      expect(result.agents?.sisyphus?.model).toBe("minimax-coding-plan/MiniMax-M2.5-highspeed")
+      expect(result.agents?.atlas?.model).toBe("minimax-coding-plan/MiniMax-M2.5-highspeed")
+      expect(result.categories?.writing?.model).toBe("minimax-coding-plan/MiniMax-M2.5-highspeed")
+    })
+
+    test("MiniMax prefers minimax.io by default when both plans are enabled", () => {
+      // #given both minimax providers are enabled with default preference
+      const config = createConfig({ hasMinimaxCnCodingPlan: true, hasMinimaxCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then minimax.io should win by default
+      expect(result.agents?.sisyphus?.model).toBe("minimax-coding-plan/MiniMax-M2.5")
+      expect(result.agents?.explore?.model).toBe("minimax-coding-plan/MiniMax-M2.5")
+    })
   })
 
   describe("Sisyphus agent special cases", () => {
@@ -396,6 +529,17 @@ describe("generateModelConfig", () => {
 
       // #then
       expect(result.agents?.sisyphus?.model).toBe("anthropic/claude-opus-4-6")
+    })
+
+    test("Sisyphus resolves to MiniMax when only MiniMax Coding Plan is available", () => {
+      // #given
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when
+      const result = generateModelConfig(config)
+
+      // #then
+      expect(result.agents?.sisyphus?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.5")
     })
 
     test("Sisyphus resolves to gpt-5.4 medium when only OpenAI is available", () => {

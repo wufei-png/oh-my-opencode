@@ -4,6 +4,7 @@ import type {
   ClaudeSubscription,
   DetectedConfig,
   InstallConfig,
+  MiniMaxModelVariant,
 } from "./types"
 import { detectedToInitialValues } from "./install-validators"
 
@@ -97,7 +98,7 @@ export async function promptInstallConfig(detected: DetectedConfig): Promise<Ins
       { value: "yes", label: "Yes", hint: "Kimi K2.5 for Sisyphus/Prometheus fallback" },
     ],
     initialValue: initial.kimiForCoding,
-})
+  })
   if (!kimiForCoding) return null
 
   const opencodeGo = await selectOrCancel({
@@ -110,6 +111,40 @@ export async function promptInstallConfig(detected: DetectedConfig): Promise<Ins
   })
   if (!opencodeGo) return null
 
+  const minimaxCnCodingPlan = await selectOrCancel({
+    message: "Do you have a MiniMax Coding Plan (minimaxi.com) subscription?",
+    options: [
+      { value: "no", label: "No", hint: "Will use other configured providers" },
+      { value: "yes", label: "Yes", hint: "Enables MiniMax fallback models via minimaxi.com" },
+    ],
+    initialValue: initial.minimaxCnCodingPlan,
+  })
+  if (!minimaxCnCodingPlan) return null
+
+  const minimaxCodingPlan = await selectOrCancel({
+    message: "Do you have a MiniMax Coding Plan (minimax.io) subscription?",
+    options: [
+      { value: "no", label: "No", hint: "Will use other configured providers" },
+      { value: "yes", label: "Yes", hint: "Enables MiniMax fallback models via minimax.io" },
+    ],
+    initialValue: initial.minimaxCodingPlan,
+  })
+  if (!minimaxCodingPlan) return null
+
+  let minimaxModelVariant: MiniMaxModelVariant = "standard"
+  if (minimaxCnCodingPlan === "yes" || minimaxCodingPlan === "yes") {
+    const selectedVariant = await selectOrCancel<MiniMaxModelVariant>({
+      message: "Which MiniMax model should oh-my-opencode prefer?",
+      options: [
+        { value: "standard", label: "Standard", hint: "Recommended: MiniMax-M2.5 works for standard and highspeed plans" },
+        { value: "highspeed", label: "Highspeed", hint: "Use only if your plan explicitly includes MiniMax-M2.5-highspeed" },
+      ],
+      initialValue: initial.minimaxModelVariant,
+    })
+    if (!selectedVariant) return null
+    minimaxModelVariant = selectedVariant
+  }
+
   return {
     hasClaude: claude !== "no",
     isMax20: claude === "max20",
@@ -120,5 +155,8 @@ export async function promptInstallConfig(detected: DetectedConfig): Promise<Ins
     hasZaiCodingPlan: zaiCodingPlan === "yes",
     hasKimiForCoding: kimiForCoding === "yes",
     hasOpencodeGo: opencodeGo === "yes",
+    hasMinimaxCnCodingPlan: minimaxCnCodingPlan === "yes",
+    hasMinimaxCodingPlan: minimaxCodingPlan === "yes",
+    minimaxModelVariant,
   }
 }
