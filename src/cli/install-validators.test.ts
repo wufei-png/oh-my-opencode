@@ -14,6 +14,9 @@ function createArgs(overrides: Partial<InstallArgs> = {}): InstallArgs {
     zaiCodingPlan: "no",
     kimiForCoding: "no",
     opencodeGo: "no",
+    minimaxCnCodingPlan: "no",
+    minimaxCodingPlan: "no",
+    minimaxModelVariant: "standard",
     skipAuth: false,
     ...overrides,
   }
@@ -30,5 +33,17 @@ describe("validateNonTuiArgs", () => {
     // #then
     expect(result.valid).toBe(false)
     expect(result.errors).toContain("Invalid --opencode-go value: maybe (expected: no, yes)")
+  })
+
+  test("rejects invalid MiniMax Coding Plan variant values", () => {
+    // #given
+    const args = createArgs({ minimaxModelVariant: "turbo" as InstallArgs["minimaxModelVariant"] })
+
+    // #when
+    const result = validateNonTuiArgs(args)
+
+    // #then
+    expect(result.valid).toBe(false)
+    expect(result.errors).toContain("Invalid --minimax-model-variant value: turbo (expected: standard, highspeed)")
   })
 })

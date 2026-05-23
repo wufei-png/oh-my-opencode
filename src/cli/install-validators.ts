@@ -5,6 +5,7 @@ import type {
   DetectedConfig,
   InstallArgs,
   InstallConfig,
+  MiniMaxModelVariant,
 } from "./types"
 
 export const SYMBOLS = {
@@ -40,6 +41,9 @@ export function formatConfigSummary(config: InstallConfig): string {
   lines.push(formatProvider("OpenCode Zen", config.hasOpencodeZen, "opencode/ models"))
   lines.push(formatProvider("Z.ai Coding Plan", config.hasZaiCodingPlan, "Librarian/Multimodal"))
   lines.push(formatProvider("Kimi For Coding", config.hasKimiForCoding, "Sisyphus/Prometheus fallback"))
+  const minimaxDetail = `MiniMax ${config.minimaxModelVariant === "highspeed" ? "M2.7-highspeed" : "M2.7"} fallback`
+  lines.push(formatProvider("MiniMax Coding Plan (minimaxi.com)", config.hasMinimaxCnCodingPlan, minimaxDetail))
+  lines.push(formatProvider("MiniMax Coding Plan (minimax.io)", config.hasMinimaxCodingPlan, minimaxDetail))
   lines.push(formatProvider("Vercel AI Gateway", config.hasVercelAiGateway, "universal proxy"))
 
   lines.push("")
@@ -48,8 +52,8 @@ export function formatConfigSummary(config: InstallConfig): string {
 
   lines.push(color.bold(color.white("Model Assignment")))
   lines.push("")
-  lines.push(`  ${SYMBOLS.info} Models auto-configured based on provider priority`)
-  lines.push(`  ${SYMBOLS.bullet} Priority: Native > Copilot > OpenCode Zen > Z.ai`)
+  lines.push(`  ${SYMBOLS.info} Models auto-configured from agent/category fallback chains`)
+  lines.push(`  ${SYMBOLS.bullet} Providers may differ per role: Native, Copilot, OpenCode Zen, Z.ai, Kimi, MiniMax`)
 
   return lines.join("\n")
 }
@@ -158,6 +162,18 @@ export function validateNonTuiArgs(args: InstallArgs): { valid: boolean; errors:
     errors.push(`Invalid --vercel-ai-gateway value: ${args.vercelAiGateway} (expected: no, yes)`)
   }
 
+  if (args.minimaxCnCodingPlan !== undefined && !["no", "yes"].includes(args.minimaxCnCodingPlan)) {
+    errors.push(`Invalid --minimax-cn-coding-plan value: ${args.minimaxCnCodingPlan} (expected: no, yes)`)
+  }
+
+  if (args.minimaxCodingPlan !== undefined && !["no", "yes"].includes(args.minimaxCodingPlan)) {
+    errors.push(`Invalid --minimax-coding-plan value: ${args.minimaxCodingPlan} (expected: no, yes)`)
+  }
+
+  if (args.minimaxModelVariant !== undefined && !["standard", "highspeed"].includes(args.minimaxModelVariant)) {
+    errors.push(`Invalid --minimax-model-variant value: ${args.minimaxModelVariant} (expected: standard, highspeed)`)
+  }
+
   return { valid: errors.length === 0, errors }
 }
 
@@ -170,8 +186,11 @@ export function argsToConfig(args: InstallArgs): InstallConfig {
     hasCopilot: args.copilot === "yes",
     hasOpencodeZen: args.opencodeZen === "yes",
     hasZaiCodingPlan: args.zaiCodingPlan === "yes",
-hasKimiForCoding: args.kimiForCoding === "yes",
+    hasKimiForCoding: args.kimiForCoding === "yes",
     hasOpencodeGo: args.opencodeGo === "yes",
+    hasMinimaxCnCodingPlan: args.minimaxCnCodingPlan === "yes",
+    hasMinimaxCodingPlan: args.minimaxCodingPlan === "yes",
+    minimaxModelVariant: args.minimaxModelVariant ?? "standard",
     hasVercelAiGateway: args.vercelAiGateway === "yes",
   }
 }
@@ -183,8 +202,11 @@ export function detectedToInitialValues(detected: DetectedConfig): {
   copilot: BooleanArg
   opencodeZen: BooleanArg
   zaiCodingPlan: BooleanArg
-kimiForCoding: BooleanArg
+  kimiForCoding: BooleanArg
   opencodeGo: BooleanArg
+  minimaxCnCodingPlan: BooleanArg
+  minimaxCodingPlan: BooleanArg
+  minimaxModelVariant: MiniMaxModelVariant
   vercelAiGateway: BooleanArg
 } {
   let claude: ClaudeSubscription = "no"
@@ -199,8 +221,11 @@ kimiForCoding: BooleanArg
     copilot: detected.hasCopilot ? "yes" : "no",
     opencodeZen: detected.hasOpencodeZen ? "yes" : "no",
     zaiCodingPlan: detected.hasZaiCodingPlan ? "yes" : "no",
-kimiForCoding: detected.hasKimiForCoding ? "yes" : "no",
+    kimiForCoding: detected.hasKimiForCoding ? "yes" : "no",
     opencodeGo: detected.hasOpencodeGo ? "yes" : "no",
+    minimaxCnCodingPlan: detected.hasMinimaxCnCodingPlan ? "yes" : "no",
+    minimaxCodingPlan: detected.hasMinimaxCodingPlan ? "yes" : "no",
+    minimaxModelVariant: detected.minimaxModelVariant,
     vercelAiGateway: detected.hasVercelAiGateway ? "yes" : "no",
   }
 }

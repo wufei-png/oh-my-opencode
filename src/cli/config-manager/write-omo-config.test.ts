@@ -20,6 +20,9 @@ const installConfig: InstallConfig = {
   hasZaiCodingPlan: false,
   hasKimiForCoding: false,
   hasOpencodeGo: false,
+  hasMinimaxCnCodingPlan: false,
+  hasMinimaxCodingPlan: false,
+  minimaxModelVariant: "standard",
   hasVercelAiGateway: false,
 }
 

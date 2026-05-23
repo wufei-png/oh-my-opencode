@@ -35,6 +35,9 @@ program
   .option("--zai-coding-plan <value>", "Z.ai Coding Plan subscription: no, yes (default: no)")
   .option("--kimi-for-coding <value>", "Kimi For Coding subscription: no, yes (default: no)")
   .option("--opencode-go <value>", "OpenCode Go subscription: no, yes (default: no)")
+  .option("--minimax-cn-coding-plan <value>", "MiniMax Coding Plan (minimaxi.com) subscription: no, yes (default: no)")
+  .option("--minimax-coding-plan <value>", "MiniMax Coding Plan (minimax.io) subscription: no, yes (default: no)")
+  .option("--minimax-model-variant <value>", "MiniMax model preference: standard, highspeed (default: standard)")
   .option("--vercel-ai-gateway <value>", "Vercel AI Gateway: no, yes (default: no)")
   .option("--skip-auth", "Skip authentication setup hints")
   .addHelpText("after", `
@@ -43,7 +46,7 @@ Examples:
   $ bunx oh-my-opencode install --no-tui --claude=max20 --openai=yes --gemini=yes --copilot=no
   $ bunx oh-my-opencode install --no-tui --claude=no --gemini=no --copilot=yes --opencode-zen=yes
 
-Model Providers (Priority: Native > Copilot > OpenCode Zen > Z.ai > Kimi > Vercel):
+Model Providers (Role-specific fallback chains):
   Claude        Native anthropic/ models (Opus, Sonnet, Haiku)
   OpenAI        Native openai/ models (GPT-5.4 for Oracle)
   Gemini        Native google/ models (Gemini 3.1 Pro, Flash)
@@ -51,7 +54,12 @@ Model Providers (Priority: Native > Copilot > OpenCode Zen > Z.ai > Kimi > Verce
   OpenCode Zen  opencode/ models (opencode/claude-opus-4-7, etc.)
   Z.ai          zai-coding-plan/glm-5 (visual-engineering fallback)
   Kimi          kimi-for-coding/k2p5 (Sisyphus/Prometheus fallback)
+  MiniMax CN    minimax-cn-coding-plan/MiniMax-M2.7 (fallback)
+  MiniMax       minimax-coding-plan/MiniMax-M2.7 (fallback)
   Vercel        vercel/ models (universal proxy, always last fallback)
+
+MiniMax Note:
+  Use --minimax-model-variant=highspeed only if your MiniMax plan explicitly includes MiniMax-M2.7-highspeed.
 `)
   .action(async (options) => {
     const args: InstallArgs = {
@@ -64,6 +72,9 @@ Model Providers (Priority: Native > Copilot > OpenCode Zen > Z.ai > Kimi > Verce
       zaiCodingPlan: options.zaiCodingPlan,
       kimiForCoding: options.kimiForCoding,
       opencodeGo: options.opencodeGo,
+      minimaxCnCodingPlan: options.minimaxCnCodingPlan,
+      minimaxCodingPlan: options.minimaxCodingPlan,
+      minimaxModelVariant: options.minimaxModelVariant,
       vercelAiGateway: options.vercelAiGateway,
       skipAuth: options.skipAuth ?? false,
     }

@@ -63,6 +63,30 @@ describe("detectCurrentConfig - single package detection", () => {
     expect(result.isInstalled).toBe(true)
     expect(result.hasOpencodeGo).toBe(true)
   })
+
+  it("detects MiniMax Coding Plan providers and highspeed variant from the existing omo config", () => {
+    // given
+    writeFileSync(testConfigPath, JSON.stringify({ plugin: ["oh-my-opencode"] }, null, 2) + "\n", "utf-8")
+    writeFileSync(
+      testOmoConfigPath,
+      JSON.stringify({
+        agents: {
+          sisyphus: { model: "minimax-coding-plan/MiniMax-M2.7-highspeed" },
+          atlas: { model: "minimax-cn-coding-plan/MiniMax-M2.7" },
+        },
+      }, null, 2) + "\n",
+      "utf-8",
+    )
+
+    // when
+    const result = detectCurrentConfig()
+
+    // then
+    expect(result.isInstalled).toBe(true)
+    expect(result.hasMinimaxCodingPlan).toBe(true)
+    expect(result.hasMinimaxCnCodingPlan).toBe(true)
+    expect(result.minimaxModelVariant).toBe("highspeed")
+  })
 })
 
 describe("addPluginToOpenCodeConfig - single package writes", () => {

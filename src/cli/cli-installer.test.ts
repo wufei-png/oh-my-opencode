@@ -37,6 +37,9 @@ describe("runCliInstaller", () => {
         hasZaiCodingPlan: false,
         hasKimiForCoding: false,
         hasOpencodeGo: false,
+        hasMinimaxCnCodingPlan: false,
+        hasMinimaxCodingPlan: false,
+        minimaxModelVariant: "standard",
         hasVercelAiGateway: false,
       }),
       spyOn(configManager, "isOpenCodeInstalled").mockResolvedValue(true),
@@ -54,6 +57,9 @@ describe("runCliInstaller", () => {
       zaiCodingPlan: "no",
       kimiForCoding: "no",
       opencodeGo: "no",
+      minimaxCnCodingPlan: "no",
+      minimaxCodingPlan: "no",
+      minimaxModelVariant: "standard",
     }
 
     // when
@@ -84,6 +90,9 @@ describe("runCliInstaller", () => {
         hasZaiCodingPlan: false,
         hasKimiForCoding: false,
         hasOpencodeGo: false,
+        hasMinimaxCnCodingPlan: false,
+        hasMinimaxCodingPlan: false,
+        minimaxModelVariant: "standard",
         hasVercelAiGateway: false,
       }),
       spyOn(configManager, "isOpenCodeInstalled").mockResolvedValue(true),
@@ -108,6 +117,9 @@ describe("runCliInstaller", () => {
       zaiCodingPlan: "no",
       kimiForCoding: "no",
       opencodeGo: "no",
+      minimaxCnCodingPlan: "no",
+      minimaxCodingPlan: "no",
+      minimaxModelVariant: "standard",
     }
 
     // when

@@ -18,6 +18,9 @@ describe("generateOmoConfig - model fallback system", () => {
       hasZaiCodingPlan: false,
       hasKimiForCoding: false,
       hasOpencodeGo: false,
+      hasMinimaxCnCodingPlan: false,
+      hasMinimaxCodingPlan: false,
+      minimaxModelVariant: "standard",
       hasVercelAiGateway: false,
     }
 
@@ -43,6 +46,9 @@ describe("generateOmoConfig - model fallback system", () => {
       hasZaiCodingPlan: false,
       hasKimiForCoding: false,
       hasOpencodeGo: false,
+      hasMinimaxCnCodingPlan: false,
+      hasMinimaxCodingPlan: false,
+      minimaxModelVariant: "standard",
       hasVercelAiGateway: false,
     }
 
@@ -66,6 +72,9 @@ describe("generateOmoConfig - model fallback system", () => {
       hasZaiCodingPlan: true,
       hasKimiForCoding: false,
       hasOpencodeGo: false,
+      hasMinimaxCnCodingPlan: false,
+      hasMinimaxCodingPlan: false,
+      minimaxModelVariant: "standard",
       hasVercelAiGateway: false,
     }
 
@@ -89,6 +98,9 @@ describe("generateOmoConfig - model fallback system", () => {
       hasZaiCodingPlan: false,
       hasKimiForCoding: false,
       hasOpencodeGo: false,
+      hasMinimaxCnCodingPlan: false,
+      hasMinimaxCodingPlan: false,
+      minimaxModelVariant: "standard",
       hasVercelAiGateway: false,
     }
 
@@ -114,6 +126,9 @@ describe("generateOmoConfig - model fallback system", () => {
       hasZaiCodingPlan: false,
       hasKimiForCoding: false,
       hasOpencodeGo: false,
+      hasMinimaxCnCodingPlan: false,
+      hasMinimaxCodingPlan: false,
+      minimaxModelVariant: "standard",
       hasVercelAiGateway: false,
     }
 
@@ -159,6 +174,9 @@ describe("generateOmoConfig - model fallback system", () => {
       hasZaiCodingPlan: false,
       hasKimiForCoding: false,
       hasOpencodeGo: false,
+      hasMinimaxCnCodingPlan: false,
+      hasMinimaxCodingPlan: false,
+      minimaxModelVariant: "standard",
       hasVercelAiGateway: false,
     }
 
@@ -181,6 +199,9 @@ describe("generateOmoConfig - model fallback system", () => {
       hasZaiCodingPlan: false,
       hasKimiForCoding: false,
       hasOpencodeGo: false,
+      hasMinimaxCnCodingPlan: false,
+      hasMinimaxCodingPlan: false,
+      minimaxModelVariant: "standard",
       hasVercelAiGateway: false,
     }
 
