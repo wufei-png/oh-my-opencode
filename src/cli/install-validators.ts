@@ -19,8 +19,6 @@ export const SYMBOLS = {
   star: color.yellow("*"),
 }
 
-export const NO_PROVIDER_FALLBACK_MODEL = "opencode/gpt-5-nano"
-
 const ANSI_COLOR_PATTERN = new RegExp("\u001b\\[[0-9;]*m", "g")
 
 function formatProvider(name: string, enabled: boolean, detail?: string): string {

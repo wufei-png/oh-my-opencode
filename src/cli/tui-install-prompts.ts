@@ -6,7 +6,8 @@ import type {
   InstallConfig,
   MiniMaxModelVariant,
 } from "./types"
-import { detectedToInitialValues, NO_PROVIDER_FALLBACK_MODEL } from "./install-validators"
+import { detectedToInitialValues } from "./install-validators"
+import { ULTIMATE_FALLBACK } from "./model-fallback"
 
 async function selectOrCancel<TValue extends Readonly<string | boolean | number>>(params: {
   message: string
@@ -33,7 +34,7 @@ export async function promptInstallConfig(detected: DetectedConfig): Promise<Ins
   const claude = await selectOrCancel<ClaudeSubscription>({
     message: "Do you have a Claude Pro/Max subscription?",
     options: [
-      { value: "no", label: "No", hint: `Will use ${NO_PROVIDER_FALLBACK_MODEL} as fallback` },
+      { value: "no", label: "No", hint: `Will use ${ULTIMATE_FALLBACK} as fallback` },
       { value: "yes", label: "Yes (standard)", hint: "Claude Opus 4.5 for orchestration" },
       { value: "max20", label: "Yes (max20 mode)", hint: "Full power with Claude Sonnet 4.6 for Librarian" },
     ],

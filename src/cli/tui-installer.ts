@@ -13,9 +13,9 @@ import {
   detectedToInitialValues,
   formatConfigSummary,
   hasAnyConfiguredProvider,
-  NO_PROVIDER_FALLBACK_MODEL,
   SYMBOLS,
 } from "./install-validators"
+import { ULTIMATE_FALLBACK } from "./model-fallback"
 import { getUnsupportedOpenCodeVersionMessage } from "./minimum-opencode-version"
 import { promptInstallConfig } from "./tui-install-prompts"
 
@@ -84,7 +84,7 @@ export async function runTuiInstaller(args: InstallArgs, version: string): Promi
   }
 
   if (!hasAnyConfiguredProvider(config)) {
-    p.log.warn(`No model providers configured. Using ${NO_PROVIDER_FALLBACK_MODEL} as fallback.`)
+    p.log.warn(`No model providers configured. Using ${ULTIMATE_FALLBACK} as fallback.`)
   }
 
   p.note(formatConfigSummary(config), isUpdate ? "Updated Configuration" : "Installation Complete")

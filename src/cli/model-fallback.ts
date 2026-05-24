@@ -29,7 +29,7 @@ const ZAI_MODEL = "zai-coding-plan/glm-4.7"
 const MINIMAX_STANDARD_MODEL_ID = "MiniMax-M2.7"
 const MINIMAX_HIGHSPEED_MODEL_ID = "MiniMax-M2.7-highspeed"
 
-const ULTIMATE_FALLBACK = "opencode/gpt-5-nano"
+export const ULTIMATE_FALLBACK = "opencode/gpt-5-nano"
 const SCHEMA_URL = "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json"
 
 function getMiniMaxModelId(config: InstallConfig): string {
@@ -193,7 +193,7 @@ export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
       } else if (avail.vercelAiGateway) {
         agentConfig = { model: "vercel/minimax/minimax-m2.7-highspeed" }
       } else {
-        agentConfig = { model: "opencode/gpt-5-nano" }
+        agentConfig = { model: ULTIMATE_FALLBACK }
       }
       agents[role] = attachAllFallbackModels(agentConfig, req.fallbackChain, avail, config)
       continue

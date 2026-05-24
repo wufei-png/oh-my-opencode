@@ -14,7 +14,6 @@ import {
   detectedToInitialValues,
   formatConfigSummary,
   hasAnyConfiguredProvider,
-  NO_PROVIDER_FALLBACK_MODEL,
   printBox,
   printError,
   printHeader,
@@ -24,6 +23,7 @@ import {
   printWarning,
   validateNonTuiArgs,
 } from "./install-validators"
+import { ULTIMATE_FALLBACK } from "./model-fallback"
 import { getUnsupportedOpenCodeVersionMessage } from "./minimum-opencode-version"
 
 export async function runCliInstaller(args: InstallArgs, version: string): Promise<number> {
@@ -103,7 +103,7 @@ export async function runCliInstaller(args: InstallArgs, version: string): Promi
   }
 
   if (!hasAnyConfiguredProvider(config)) {
-    printWarning(`No model providers configured. Using ${NO_PROVIDER_FALLBACK_MODEL} as fallback.`)
+    printWarning(`No model providers configured. Using ${ULTIMATE_FALLBACK} as fallback.`)
   }
 
   console.log(`${SYMBOLS.star} ${color.bold(color.green(isUpdate ? "Configuration updated!" : "Installation complete!"))}`)
