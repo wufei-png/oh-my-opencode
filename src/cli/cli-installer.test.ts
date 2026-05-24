@@ -132,4 +132,65 @@ describe("runCliInstaller", () => {
       spy.mockRestore()
     }
   })
+
+  it("does not warn about missing providers when MiniMax is configured", async () => {
+    // given
+    const restoreSpies = [
+      spyOn(configManager, "detectCurrentConfig").mockReturnValue({
+        isInstalled: false,
+        installedVersion: null,
+        hasClaude: false,
+        isMax20: false,
+        hasOpenAI: false,
+        hasGemini: false,
+        hasCopilot: false,
+        hasOpencodeZen: false,
+        hasZaiCodingPlan: false,
+        hasKimiForCoding: false,
+        hasOpencodeGo: false,
+        hasMinimaxCnCodingPlan: false,
+        hasMinimaxCodingPlan: false,
+        minimaxModelVariant: "standard",
+        hasVercelAiGateway: false,
+      }),
+      spyOn(configManager, "isOpenCodeInstalled").mockResolvedValue(true),
+      spyOn(configManager, "getOpenCodeVersion").mockResolvedValue("1.4.0"),
+      spyOn(configManager, "addPluginToOpenCodeConfig").mockResolvedValue({
+        success: true,
+        configPath: "/tmp/opencode.jsonc",
+      }),
+      spyOn(configManager, "writeOmoConfig").mockReturnValue({
+        success: true,
+        configPath: "/tmp/oh-my-opencode.jsonc",
+      }),
+    ]
+
+    const args: InstallArgs = {
+      tui: false,
+      claude: "no",
+      openai: "no",
+      gemini: "no",
+      copilot: "no",
+      opencodeZen: "no",
+      zaiCodingPlan: "no",
+      kimiForCoding: "no",
+      opencodeGo: "no",
+      minimaxCnCodingPlan: "no",
+      minimaxCodingPlan: "yes",
+      minimaxModelVariant: "standard",
+      skipAuth: true,
+    }
+
+    // when
+    const result = await runCliInstaller(args, "3.4.0")
+
+    // then
+    expect(result).toBe(0)
+    const allCalls = mockConsoleLog.mock.calls.flat().join("\n")
+    expect(allCalls).not.toContain("No model providers configured. Using opencode/gpt-5-nano as fallback.")
+
+    for (const spy of restoreSpies) {
+      spy.mockRestore()
+    }
+  })
 })

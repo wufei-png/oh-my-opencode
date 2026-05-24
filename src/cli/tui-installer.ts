@@ -9,7 +9,13 @@ import {
   isOpenCodeInstalled,
   writeOmoConfig,
 } from "./config-manager"
-import { detectedToInitialValues, formatConfigSummary, SYMBOLS } from "./install-validators"
+import {
+  detectedToInitialValues,
+  formatConfigSummary,
+  hasAnyConfiguredProvider,
+  NO_PROVIDER_FALLBACK_MODEL,
+  SYMBOLS,
+} from "./install-validators"
 import { getUnsupportedOpenCodeVersionMessage } from "./minimum-opencode-version"
 import { promptInstallConfig } from "./tui-install-prompts"
 
@@ -77,8 +83,8 @@ export async function runTuiInstaller(args: InstallArgs, version: string): Promi
     )
   }
 
-  if (!config.hasClaude && !config.hasOpenAI && !config.hasGemini && !config.hasCopilot && !config.hasOpencodeZen && !config.hasVercelAiGateway) {
-    p.log.warn("No model providers configured. Using opencode/big-pickle as fallback.")
+  if (!hasAnyConfiguredProvider(config)) {
+    p.log.warn(`No model providers configured. Using ${NO_PROVIDER_FALLBACK_MODEL} as fallback.`)
   }
 
   p.note(formatConfigSummary(config), isUpdate ? "Updated Configuration" : "Installation Complete")

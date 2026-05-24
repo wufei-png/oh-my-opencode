@@ -18,6 +18,8 @@ export const SYMBOLS = {
   star: color.yellow("*"),
 }
 
+export const NO_PROVIDER_FALLBACK_MODEL = "opencode/gpt-5-nano"
+
 const ANSI_COLOR_PATTERN = new RegExp("\u001b\\[[0-9;]*m", "g")
 
 function formatProvider(name: string, enabled: boolean, detail?: string): string {
@@ -56,6 +58,22 @@ export function formatConfigSummary(config: InstallConfig): string {
   lines.push(`  ${SYMBOLS.bullet} Providers may differ per role: Native, Copilot, OpenCode Zen, Z.ai, Kimi, MiniMax`)
 
   return lines.join("\n")
+}
+
+export function hasAnyConfiguredProvider(config: InstallConfig): boolean {
+  return (
+    config.hasClaude ||
+    config.hasOpenAI ||
+    config.hasGemini ||
+    config.hasCopilot ||
+    config.hasOpencodeZen ||
+    config.hasZaiCodingPlan ||
+    config.hasKimiForCoding ||
+    config.hasOpencodeGo ||
+    config.hasMinimaxCnCodingPlan ||
+    config.hasMinimaxCodingPlan ||
+    config.hasVercelAiGateway
+  )
 }
 
 export function printHeader(isUpdate: boolean): void {

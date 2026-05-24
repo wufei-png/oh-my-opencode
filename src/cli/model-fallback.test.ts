@@ -2,7 +2,7 @@
 
 import { describe, expect, test } from "bun:test"
 
-import { generateModelConfig } from "./model-fallback"
+import { generateModelConfig, shouldShowChatGPTOnlyWarning } from "./model-fallback"
 import type { InstallConfig } from "./types"
 
 function createConfig(overrides: Partial<InstallConfig> = {}): InstallConfig {
@@ -843,5 +843,18 @@ describe("generateModelConfig", () => {
         "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json"
       )
     })
+  })
+})
+
+describe("shouldShowChatGPTOnlyWarning", () => {
+  test("returns false when MiniMax is also configured", () => {
+    // #given
+    const config = createConfig({ hasOpenAI: true, hasMinimaxCodingPlan: true })
+
+    // #when
+    const result = shouldShowChatGPTOnlyWarning(config)
+
+    // #then
+    expect(result).toBe(false)
   })
 })

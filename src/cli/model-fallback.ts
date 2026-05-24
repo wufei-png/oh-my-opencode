@@ -279,5 +279,17 @@ export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
 }
 
 export function shouldShowChatGPTOnlyWarning(config: InstallConfig): boolean {
-  return !config.hasClaude && !config.hasGemini && config.hasOpenAI
+  return (
+    config.hasOpenAI &&
+    !config.hasClaude &&
+    !config.hasGemini &&
+    !config.hasCopilot &&
+    !config.hasOpencodeZen &&
+    !config.hasZaiCodingPlan &&
+    !config.hasKimiForCoding &&
+    !config.hasOpencodeGo &&
+    !config.hasMinimaxCnCodingPlan &&
+    !config.hasMinimaxCodingPlan &&
+    !config.hasVercelAiGateway
+  )
 }

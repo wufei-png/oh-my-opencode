@@ -13,6 +13,8 @@ import {
   argsToConfig,
   detectedToInitialValues,
   formatConfigSummary,
+  hasAnyConfiguredProvider,
+  NO_PROVIDER_FALLBACK_MODEL,
   printBox,
   printError,
   printHeader,
@@ -100,15 +102,8 @@ export async function runCliInstaller(args: InstallArgs, version: string): Promi
     )
   }
 
-  if (
-    !config.hasClaude &&
-    !config.hasOpenAI &&
-    !config.hasGemini &&
-    !config.hasCopilot &&
-    !config.hasOpencodeZen &&
-    !config.hasVercelAiGateway
-  ) {
-    printWarning("No model providers configured. Using opencode/big-pickle as fallback.")
+  if (!hasAnyConfiguredProvider(config)) {
+    printWarning(`No model providers configured. Using ${NO_PROVIDER_FALLBACK_MODEL} as fallback.`)
   }
 
   console.log(`${SYMBOLS.star} ${color.bold(color.green(isUpdate ? "Configuration updated!" : "Installation complete!"))}`)
