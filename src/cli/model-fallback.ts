@@ -7,14 +7,19 @@ import type { FallbackEntry } from "../shared/model-requirements"
 import type { InstallConfig } from "./types"
 
 import type { AgentConfig, CategoryConfig, GeneratedOmoConfig } from "./model-fallback-types"
-import { applyOpenAiOnlyModelCatalog, isOpenAiOnlyAvailability } from "./openai-only-model-catalog"
-import { isProviderAvailable, toProviderAvailability } from "./provider-availability"
+import { applyOpenAiOnlyModelCatalog } from "./openai-only-model-catalog"
 import {
-	getSisyphusFallbackChain,
-	isAnyFallbackEntryAvailable,
-	isRequiredModelAvailable,
-	isRequiredProviderAvailable,
-	resolveModelFromChain,
+  hasAnyAvailableProvider,
+  isOpenAiOnlyAvailability,
+  isProviderAvailable,
+  toProviderAvailability,
+} from "./provider-availability"
+import {
+  getSisyphusFallbackChain,
+  isAnyFallbackEntryAvailable,
+  isRequiredModelAvailable,
+  isRequiredProviderAvailable,
+  resolveModelFromChain,
 } from "./fallback-chain-resolution"
 import { transformModelForProvider } from "./provider-model-id-transform"
 
@@ -130,24 +135,9 @@ function attachAllFallbackModels<T extends AgentConfig | CategoryConfig>(
     fallback_models: fallbackModels,
   }
 }
-
-
-
 export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
   const avail = toProviderAvailability(config)
-  const hasAnyProvider =
-    avail.native.claude ||
-    avail.native.openai ||
-    avail.native.gemini ||
-    avail.opencodeZen ||
-    avail.copilot ||
-    avail.zai ||
-    avail.kimiForCoding ||
-    avail.opencodeGo ||
-    avail.minimaxCnCodingPlan ||
-    avail.minimaxCodingPlan ||
-    avail.vercelAiGateway
-  if (!hasAnyProvider) {
+  if (!hasAnyAvailableProvider(avail)) {
     return {
       $schema: SCHEMA_URL,
       agents: Object.fromEntries(
@@ -279,17 +269,5 @@ export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
 }
 
 export function shouldShowChatGPTOnlyWarning(config: InstallConfig): boolean {
-  return (
-    config.hasOpenAI &&
-    !config.hasClaude &&
-    !config.hasGemini &&
-    !config.hasCopilot &&
-    !config.hasOpencodeZen &&
-    !config.hasZaiCodingPlan &&
-    !config.hasKimiForCoding &&
-    !config.hasOpencodeGo &&
-    !config.hasMinimaxCnCodingPlan &&
-    !config.hasMinimaxCodingPlan &&
-    !config.hasVercelAiGateway
-  )
+  return isOpenAiOnlyAvailability(toProviderAvailability(config))
 }

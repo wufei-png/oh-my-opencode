@@ -7,6 +7,7 @@ import type {
   InstallConfig,
   MiniMaxModelVariant,
 } from "./types"
+import { hasAnyAvailableProvider, toProviderAvailability } from "./provider-availability"
 
 export const SYMBOLS = {
   check: color.green("[OK]"),
@@ -61,19 +62,7 @@ export function formatConfigSummary(config: InstallConfig): string {
 }
 
 export function hasAnyConfiguredProvider(config: InstallConfig): boolean {
-  return (
-    config.hasClaude ||
-    config.hasOpenAI ||
-    config.hasGemini ||
-    config.hasCopilot ||
-    config.hasOpencodeZen ||
-    config.hasZaiCodingPlan ||
-    config.hasKimiForCoding ||
-    config.hasOpencodeGo ||
-    config.hasMinimaxCnCodingPlan ||
-    config.hasMinimaxCodingPlan ||
-    config.hasVercelAiGateway
-  )
+  return hasAnyAvailableProvider(toProviderAvailability(config))
 }
 
 export function printHeader(isUpdate: boolean): void {
