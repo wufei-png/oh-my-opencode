@@ -973,15 +973,15 @@ describe("resolveSubagentExecution", () => {
   test("does not use unavailable matchedAgent.model as fallback for custom subagent", async () => {
     //#given
     readProviderModelsCacheMock.mockReturnValue({
-      models: { minimaxi: ["MiniMax-M2.7"] },
-      connected: ["minimaxi"],
+      models: { minimax: ["MiniMax-M2.7"] },
+      connected: ["minimax"],
       updatedAt: "2026-03-03T00:00:00.000Z",
     })
-    readConnectedProvidersCacheMock.mockReturnValue(["minimaxi"])
+    readConnectedProvidersCacheMock.mockReturnValue(["minimax"])
     const args = createBaseArgs({ subagent_type: "my-custom-agent" })
     const executorCtx = createExecutorContext(
       async () => ([
-        { name: "my-custom-agent", mode: "subagent", model: "minimaxi/MiniMax-M2.7-highspeed" },
+        { name: "my-custom-agent", mode: "subagent", model: "minimax/MiniMax-M2.7-highspeed" },
       ]),
     )
 
@@ -996,15 +996,15 @@ describe("resolveSubagentExecution", () => {
   test("uses matchedAgent.model as fallback when model is available", async () => {
     //#given
     readProviderModelsCacheMock.mockReturnValue({
-      models: { minimaxi: ["MiniMax-M2.7-highspeed"] },
-      connected: ["minimaxi"],
+      models: { minimax: ["MiniMax-M2.7-highspeed"] },
+      connected: ["minimax"],
       updatedAt: "2026-03-03T00:00:00.000Z",
     })
-    readConnectedProvidersCacheMock.mockReturnValue(["minimaxi"])
+    readConnectedProvidersCacheMock.mockReturnValue(["minimax"])
     const args = createBaseArgs({ subagent_type: "my-custom-agent" })
     const executorCtx = createExecutorContext(
       async () => ([
-        { name: "my-custom-agent", mode: "subagent", model: "minimaxi/MiniMax-M2.7-highspeed" },
+        { name: "my-custom-agent", mode: "subagent", model: "minimax/MiniMax-M2.7-highspeed" },
       ]),
     )
 
@@ -1013,7 +1013,7 @@ describe("resolveSubagentExecution", () => {
 
     //#then
     expect(result.error).toBeUndefined()
-    expect(result.categoryModel).toEqual({ providerID: "minimaxi", modelID: "MiniMax-M2.7-highspeed" })
+    expect(result.categoryModel).toEqual({ providerID: "minimax", modelID: "MiniMax-M2.7-highspeed" })
   })
 
   test("prefers the most specific prefix match when fallback entries share a prefix", async () => {
@@ -1249,17 +1249,17 @@ describe("resolveSubagentExecution", () => {
   test("project agent takes precedence over user agent with same name", async () => {
     //#given
     readProviderModelsCacheMock.mockReturnValue({
-      models: { minimaxi: ["MiniMax-M2.7-highspeed", "claude-3-haiku"] },
-      connected: ["minimaxi"],
+      models: { minimax: ["MiniMax-M2.7-highspeed", "claude-3-haiku"] },
+      connected: ["minimax"],
       updatedAt: "2026-03-03T00:00:00.000Z",
     })
-    readConnectedProvidersCacheMock.mockReturnValue(["minimaxi"])
+    readConnectedProvidersCacheMock.mockReturnValue(["minimax"])
     loadUserAgentsMock.mockImplementation(() => ({
       "my-custom-agent": {
         description: "User agent",
         mode: "subagent",
         prompt: "User prompt",
-        model: "minimaxi/claude-3-haiku",
+        model: "minimax/claude-3-haiku",
       },
     }))
     loadProjectAgentsMock.mockImplementation(() => ({
@@ -1267,7 +1267,7 @@ describe("resolveSubagentExecution", () => {
         description: "Project agent",
         mode: "subagent",
         prompt: "Project prompt",
-        model: "minimaxi/MiniMax-M2.7-highspeed",
+        model: "minimax/MiniMax-M2.7-highspeed",
       },
     }))
     const args = createBaseArgs({ subagent_type: "my-custom-agent" })

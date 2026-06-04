@@ -1,5 +1,6 @@
 export type ClaudeSubscription = "no" | "yes" | "max20"
 export type BooleanArg = "no" | "yes"
+export type MiniMaxModelVariant = "standard" | "highspeed"
 
 export interface InstallArgs {
   tui: boolean
@@ -9,8 +10,11 @@ export interface InstallArgs {
   copilot?: BooleanArg
   opencodeZen?: BooleanArg
   zaiCodingPlan?: BooleanArg
-kimiForCoding?: BooleanArg
+  kimiForCoding?: BooleanArg
   opencodeGo?: BooleanArg
+  minimaxCnCodingPlan?: BooleanArg
+  minimaxCodingPlan?: BooleanArg
+  minimaxModelVariant?: MiniMaxModelVariant
   vercelAiGateway?: BooleanArg
   skipAuth?: boolean
 }
@@ -25,6 +29,9 @@ export interface InstallConfig {
   hasZaiCodingPlan: boolean
   hasKimiForCoding: boolean
   hasOpencodeGo: boolean
+  hasMinimaxCnCodingPlan: boolean
+  hasMinimaxCodingPlan: boolean
+  minimaxModelVariant: MiniMaxModelVariant
   hasVercelAiGateway: boolean
 }
 
@@ -46,5 +53,8 @@ export interface DetectedConfig {
   hasZaiCodingPlan: boolean
   hasKimiForCoding: boolean
   hasOpencodeGo: boolean
+  hasMinimaxCnCodingPlan: boolean
+  hasMinimaxCodingPlan: boolean
+  minimaxModelVariant: MiniMaxModelVariant
   hasVercelAiGateway: boolean
 }

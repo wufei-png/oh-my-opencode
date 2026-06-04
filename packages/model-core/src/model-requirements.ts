@@ -41,6 +41,7 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       },
       { providers: ["openai", "github-copilot", "opencode", "vercel"], model: "gpt-5.5", variant: "medium" },
       { providers: ["zai-coding-plan", "opencode", "vercel"], model: "glm-5" },
+      { providers: ["minimax-coding-plan", "minimax-cn-coding-plan"], model: "MiniMax-M2.7" },
       { providers: ["opencode"], model: "big-pickle" },
     ],
     requiresAnyModel: true,
@@ -81,6 +82,7 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       { providers: ["opencode-go"], model: "qwen3.5-plus" },
       { providers: ["vercel"], model: "minimax-m2.7-highspeed" },
       { providers: ["opencode-go", "vercel"], model: "minimax-m2.7" },
+      { providers: ["minimax-coding-plan", "minimax-cn-coding-plan"], model: "MiniMax-M2.7" },
       { providers: ["anthropic", "opencode", "vercel"], model: "claude-haiku-4-5" },
       { providers: ["openai", "opencode", "vercel"], model: "gpt-5.4-nano" },
     ],
@@ -91,6 +93,7 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       { providers: ["opencode-go"], model: "qwen3.5-plus" },
       { providers: ["vercel"], model: "minimax-m2.7-highspeed" },
       { providers: ["opencode-go", "vercel"], model: "minimax-m2.7" },
+      { providers: ["minimax-coding-plan", "minimax-cn-coding-plan"], model: "MiniMax-M2.7" },
       { providers: ["anthropic", "opencode", "vercel"], model: "claude-haiku-4-5" },
       { providers: ["openai", "opencode", "vercel"], model: "gpt-5.4-nano" },
     ],
@@ -116,6 +119,7 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
         variant: "high",
       },
       { providers: ["opencode-go", "vercel"], model: "glm-5.1" },
+      { providers: ["minimax-coding-plan", "minimax-cn-coding-plan"], model: "MiniMax-M2.7" },
       {
         providers: ["google", "github-copilot", "opencode", "vercel"],
         model: "gemini-3.1-pro",
@@ -140,6 +144,7 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       },
       { providers: ["opencode-go", "vercel"], model: "glm-5.1" },
       { providers: ["kimi-for-coding"], model: "k2p5" },
+      { providers: ["minimax-coding-plan", "minimax-cn-coding-plan"], model: "MiniMax-M2.7" },
     ],
   },
   momus: {
@@ -172,6 +177,7 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
         variant: "medium",
       },
       { providers: ["opencode-go", "vercel"], model: "minimax-m2.7" },
+      { providers: ["minimax-coding-plan", "minimax-cn-coding-plan"], model: "MiniMax-M2.7" },
     ],
   },
   "sisyphus-junior": {
@@ -184,6 +190,7 @@ export const AGENT_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
         variant: "medium",
       },
       { providers: ["opencode-go", "vercel"], model: "minimax-m2.7" },
+      { providers: ["minimax-coding-plan", "minimax-cn-coding-plan"], model: "MiniMax-M2.7" },
       { providers: ["opencode"], model: "big-pickle" },
     ],
   },
@@ -280,6 +287,7 @@ export const CATEGORY_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
         model: "gemini-3-flash",
       },
       { providers: ["opencode-go", "vercel"], model: "minimax-m2.7" },
+      { providers: ["minimax-coding-plan", "minimax-cn-coding-plan"], model: "MiniMax-M2.7" },
       { providers: ["opencode", "vercel"], model: "gpt-5-nano" },
     ],
   },
@@ -300,6 +308,7 @@ export const CATEGORY_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
         model: "gemini-3-flash",
       },
       { providers: ["opencode-go", "vercel"], model: "minimax-m2.7" },
+      { providers: ["minimax-coding-plan", "minimax-cn-coding-plan"], model: "MiniMax-M2.7" },
     ],
   },
   "unspecified-high": {
@@ -316,6 +325,7 @@ export const CATEGORY_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
       },
       { providers: ["zai-coding-plan", "opencode", "vercel"], model: "glm-5" },
       { providers: ["kimi-for-coding"], model: "k2p5" },
+      { providers: ["minimax-coding-plan", "minimax-cn-coding-plan"], model: "MiniMax-M2.7" },
       { providers: ["opencode-go", "vercel"], model: "glm-5.1" },
       { providers: ["opencode", "vercel"], model: "kimi-k2.5" },
       {
@@ -344,6 +354,7 @@ export const CATEGORY_MODEL_REQUIREMENTS: Record<string, ModelRequirement> = {
         model: "claude-sonnet-4-6",
       },
       { providers: ["opencode-go", "vercel"], model: "minimax-m2.7" },
+      { providers: ["minimax-coding-plan", "minimax-cn-coding-plan"], model: "MiniMax-M2.7" },
     ],
   },
 };

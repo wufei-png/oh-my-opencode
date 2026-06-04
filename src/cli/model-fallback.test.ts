@@ -2,7 +2,7 @@
 
 import { describe, expect, test } from "bun:test"
 
-import { generateModelConfig } from "./model-fallback"
+import { generateModelConfig, shouldShowChatGPTOnlyWarning } from "./model-fallback"
 import type { InstallConfig } from "./types"
 
 function createConfig(overrides: Partial<InstallConfig> = {}): InstallConfig {
@@ -16,6 +16,9 @@ function createConfig(overrides: Partial<InstallConfig> = {}): InstallConfig {
     hasZaiCodingPlan: false,
     hasKimiForCoding: false,
     hasOpencodeGo: false,
+    hasMinimaxCnCodingPlan: false,
+    hasMinimaxCodingPlan: false,
+    minimaxModelVariant: "standard",
     hasVercelAiGateway: false,
     ...overrides,
   }
@@ -201,6 +204,136 @@ describe("generateModelConfig", () => {
 
       // #then should use ZAI_MODEL for librarian
       expect(result).toMatchSnapshot()
+    })
+
+    test("explore uses MiniMax CN model when only MiniMax CN is available", () => {
+      // #given only MiniMax CN Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then explore should use MiniMax CN
+      expect(result.agents?.explore?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.7")
+    })
+
+    test("multimodal-looker falls back to ultimate fallback when only MiniMax CN is available", () => {
+      // #given only MiniMax CN Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then multimodal-looker should not use text-only MiniMax
+      expect(result.agents?.["multimodal-looker"]?.model).toBe("opencode/gpt-5-nano")
+    })
+  })
+
+  describe("MiniMax fallback coverage", () => {
+    test("prometheus resolves to MiniMax when only MiniMax CN is available", () => {
+      // #given only MiniMax CN Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then prometheus should use MiniMax
+      expect(result.agents?.prometheus?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.7")
+    })
+
+    test("metis resolves to MiniMax when only MiniMax CN is available", () => {
+      // #given only MiniMax CN Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then metis should use MiniMax
+      expect(result.agents?.metis?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.7")
+    })
+
+    test("atlas resolves to MiniMax when only MiniMax CN is available", () => {
+      // #given only MiniMax CN Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then atlas should use MiniMax
+      expect(result.agents?.atlas?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.7")
+    })
+
+    test("visual-engineering falls back to ultimate fallback when only MiniMax CN is available", () => {
+      // #given only MiniMax CN Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then visual-engineering should not use MiniMax when no vision-capable provider is available
+      expect(result.categories?.["visual-engineering"]?.model).toBe("opencode/gpt-5-nano")
+    })
+
+    test("unspecified-high resolves to MiniMax when only MiniMax CN is available with isMax20", () => {
+      // #given only MiniMax CN Coding Plan is available with Max 20 plan
+      const config = createConfig({ hasMinimaxCnCodingPlan: true, isMax20: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then unspecified-high should use MiniMax
+      expect(result.categories?.["unspecified-high"]?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.7")
+    })
+
+    test("writing resolves to MiniMax when only MiniMax CN is available", () => {
+      // #given only MiniMax CN Coding Plan is available
+      const config = createConfig({ hasMinimaxCnCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then writing should use MiniMax
+      expect(result.categories?.writing?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.7")
+    })
+
+    test("MiniMax Coding Plan is used when only minimax.io is available", () => {
+      // #given only MiniMax Coding Plan (minimax.io) is available
+      const config = createConfig({ hasMinimaxCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then agents and categories should use MiniMax Coding Plan
+      expect(result.agents?.sisyphus?.model).toBe("minimax-coding-plan/MiniMax-M2.7")
+      expect(result.agents?.prometheus?.model).toBe("minimax-coding-plan/MiniMax-M2.7")
+      expect(result.agents?.metis?.model).toBe("minimax-coding-plan/MiniMax-M2.7")
+      expect(result.agents?.atlas?.model).toBe("minimax-coding-plan/MiniMax-M2.7")
+      expect(result.categories?.writing?.model).toBe("minimax-coding-plan/MiniMax-M2.7")
+    })
+
+    test("MiniMax highspeed variant is used when explicitly requested", () => {
+      // #given minimax.io is available and highspeed is explicitly requested
+      const config = createConfig({ hasMinimaxCodingPlan: true, minimaxModelVariant: "highspeed" })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then the generated models should use MiniMax-M2.7-highspeed
+      expect(result.agents?.sisyphus?.model).toBe("minimax-coding-plan/MiniMax-M2.7-highspeed")
+      expect(result.agents?.atlas?.model).toBe("minimax-coding-plan/MiniMax-M2.7-highspeed")
+      expect(result.categories?.writing?.model).toBe("minimax-coding-plan/MiniMax-M2.7-highspeed")
+    })
+
+    test("MiniMax prefers minimax.io by default when both plans are enabled", () => {
+      // #given both minimax providers are enabled with default preference
+      const config = createConfig({ hasMinimaxCnCodingPlan: true, hasMinimaxCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then minimax.io should win by default
+      expect(result.agents?.sisyphus?.model).toBe("minimax-coding-plan/MiniMax-M2.7")
+      expect(result.agents?.explore?.model).toBe("minimax-coding-plan/MiniMax-M2.7")
     })
   })
 
@@ -540,8 +673,33 @@ describe("generateModelConfig", () => {
       expect(result.agents?.librarian?.model).toBe("zai-coding-plan/glm-4.7")
     })
 
+    test("librarian uses MiniMax Coding Plan when only minimax.io is available", () => {
+      // #given only MiniMax Coding Plan is available
+      const config = createConfig({ hasMinimaxCodingPlan: true })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then librarian should use MiniMax Coding Plan
+      expect(result.agents?.librarian?.model).toBe("minimax-coding-plan/MiniMax-M2.7")
+    })
+
+    test("librarian uses MiniMax CN highspeed when explicitly requested", () => {
+      // #given only MiniMax CN Coding Plan is available with highspeed preference
+      const config = createConfig({
+        hasMinimaxCnCodingPlan: true,
+        minimaxModelVariant: "highspeed",
+      })
+
+      // #when generateModelConfig is called
+      const result = generateModelConfig(config)
+
+      // #then librarian should use the requested MiniMax highspeed variant
+      expect(result.agents?.librarian?.model).toBe("minimax-cn-coding-plan/MiniMax-M2.7-highspeed")
+    })
+
     test("librarian is omitted when no librarian provider matches", () => {
-      // #given only Claude is available (no opencode-go or ZAI)
+      // #given only Claude is available (no librarian-specific provider)
       const config = createConfig({ hasClaude: true })
 
       // #when generateModelConfig is called
@@ -685,5 +843,18 @@ describe("generateModelConfig", () => {
         "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json"
       )
     })
+  })
+})
+
+describe("shouldShowChatGPTOnlyWarning", () => {
+  test("returns false when MiniMax is also configured", () => {
+    // #given
+    const config = createConfig({ hasOpenAI: true, hasMinimaxCodingPlan: true })
+
+    // #when
+    const result = shouldShowChatGPTOnlyWarning(config)
+
+    // #then
+    expect(result).toBe(false)
   })
 })

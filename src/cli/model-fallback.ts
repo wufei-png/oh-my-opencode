@@ -7,27 +7,67 @@ import type { FallbackEntry } from "../shared/model-requirements"
 import type { InstallConfig } from "./types"
 
 import type { AgentConfig, CategoryConfig, GeneratedOmoConfig } from "./model-fallback-types"
-import { applyOpenAiOnlyModelCatalog, isOpenAiOnlyAvailability } from "./openai-only-model-catalog"
-import { isProviderAvailable, toProviderAvailability } from "./provider-availability"
+import { applyOpenAiOnlyModelCatalog } from "./openai-only-model-catalog"
 import {
-	getSisyphusFallbackChain,
-	isAnyFallbackEntryAvailable,
-	isRequiredModelAvailable,
-	isRequiredProviderAvailable,
-	resolveModelFromChain,
+  hasAnyAvailableProvider,
+  isOpenAiOnlyAvailability,
+  isProviderAvailable,
+  toProviderAvailability,
+} from "./provider-availability"
+import {
+  getSisyphusFallbackChain,
+  isAnyFallbackEntryAvailable,
+  isRequiredModelAvailable,
+  isRequiredProviderAvailable,
+  resolveModelFromChain,
 } from "./fallback-chain-resolution"
 import { transformModelForProvider } from "./provider-model-id-transform"
 
 export type { GeneratedOmoConfig } from "./model-fallback-types"
 
 const ZAI_MODEL = "zai-coding-plan/glm-4.7"
+const MINIMAX_STANDARD_MODEL_ID = "MiniMax-M2.7"
+const MINIMAX_HIGHSPEED_MODEL_ID = "MiniMax-M2.7-highspeed"
 
-const ULTIMATE_FALLBACK = "opencode/gpt-5-nano"
+export const ULTIMATE_FALLBACK = "opencode/gpt-5-nano"
 const SCHEMA_URL = "https://raw.githubusercontent.com/code-yeongyu/oh-my-openagent/dev/assets/oh-my-opencode.schema.json"
 
-function toFallbackModelObject(entry: FallbackEntry, provider: string): FallbackModelObject {
+function getMiniMaxModelId(config: InstallConfig): string {
+  return config.minimaxModelVariant === "highspeed"
+    ? MINIMAX_HIGHSPEED_MODEL_ID
+    : MINIMAX_STANDARD_MODEL_ID
+}
+
+function getMiniMaxModel(providerID: "minimax-cn-coding-plan" | "minimax-coding-plan", config: InstallConfig): string {
+  return `${providerID}/${getMiniMaxModelId(config)}`
+}
+
+function getPreferredMiniMaxModel(
+  availability: ReturnType<typeof toProviderAvailability>,
+  config: InstallConfig,
+): string | undefined {
+  if (availability.minimaxCodingPlan) {
+    return getMiniMaxModel("minimax-coding-plan", config)
+  }
+
+  if (availability.minimaxCnCodingPlan) {
+    return getMiniMaxModel("minimax-cn-coding-plan", config)
+  }
+
+  return undefined
+}
+
+function applyMiniMaxVariant(model: string, config: InstallConfig): string {
+  if (!model.includes("minimax-cn-coding-plan/") && !model.includes("minimax-coding-plan/")) {
+    return model
+  }
+
+  return model.replace(/MiniMax-M2\.7(-highspeed)?$/, getMiniMaxModelId(config))
+}
+
+function toFallbackModelObject(entry: FallbackEntry, provider: string, config: InstallConfig): FallbackModelObject {
   return {
-    model: `${provider}/${transformModelForProvider(provider, entry.model)}`,
+    model: applyMiniMaxVariant(`${provider}/${transformModelForProvider(provider, entry.model)}`, config),
     ...(entry.variant ? { variant: entry.variant } : {}),
     ...(entry.reasoningEffort ? { reasoningEffort: entry.reasoningEffort as FallbackModelObject["reasoningEffort"] } : {}),
     ...(entry.temperature !== undefined ? { temperature: entry.temperature } : {}),
@@ -40,11 +80,12 @@ function toFallbackModelObject(entry: FallbackEntry, provider: string): Fallback
 function collectAvailableFallbacks(
   fallbackChain: FallbackEntry[],
   availability: ReturnType<typeof toProviderAvailability>,
+  config: InstallConfig,
 ): FallbackModelObject[] {
   const expandedFallbacks = fallbackChain.flatMap((entry) =>
     entry.providers
       .filter((provider) => isProviderAvailable(provider, availability))
-      .map((provider) => toFallbackModelObject(entry, provider))
+      .map((provider) => toFallbackModelObject(entry, provider, config))
   )
   return expandedFallbacks.filter((entry, index, allEntries) =>
     allEntries.findIndex((candidate) =>
@@ -58,8 +99,9 @@ function attachFallbackModels<T extends AgentConfig | CategoryConfig>(
   config: T,
   fallbackChain: FallbackEntry[],
   availability: ReturnType<typeof toProviderAvailability>,
+  installConfig: InstallConfig,
 ): T {
-  const uniqueFallbacks = collectAvailableFallbacks(fallbackChain, availability)
+  const uniqueFallbacks = collectAvailableFallbacks(fallbackChain, availability, installConfig)
   const primaryIndex = uniqueFallbacks.findIndex((entry) => entry.model === config.model)
   if (primaryIndex === -1) {
     return config
@@ -80,8 +122,9 @@ function attachAllFallbackModels<T extends AgentConfig | CategoryConfig>(
   config: T,
   fallbackChain: FallbackEntry[],
   availability: ReturnType<typeof toProviderAvailability>,
+  installConfig: InstallConfig,
 ): T {
-  const uniqueFallbacks = collectAvailableFallbacks(fallbackChain, availability)
+  const uniqueFallbacks = collectAvailableFallbacks(fallbackChain, availability, installConfig)
   const fallbackModels = uniqueFallbacks.filter((entry) => entry.model !== config.model)
   if (fallbackModels.length === 0) {
     return config
@@ -92,22 +135,9 @@ function attachAllFallbackModels<T extends AgentConfig | CategoryConfig>(
     fallback_models: fallbackModels,
   }
 }
-
-
-
 export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
   const avail = toProviderAvailability(config)
-  const hasAnyProvider =
-    avail.native.claude ||
-    avail.native.openai ||
-    avail.native.gemini ||
-    avail.opencodeZen ||
-    avail.copilot ||
-    avail.zai ||
-    avail.kimiForCoding ||
-    avail.opencodeGo ||
-    avail.vercelAiGateway
-  if (!hasAnyProvider) {
+  if (!hasAnyAvailableProvider(avail)) {
     return {
       $schema: SCHEMA_URL,
       agents: Object.fromEntries(
@@ -127,23 +157,27 @@ export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
   for (const [role, req] of Object.entries(CLI_AGENT_MODEL_REQUIREMENTS)) {
     if (role === "librarian") {
       let agentConfig: AgentConfig | undefined
+      const preferredMiniMaxModel = getPreferredMiniMaxModel(avail, config)
       if (avail.native.openai) {
         agentConfig = { model: "openai/gpt-5.4-mini-fast" }
       } else if (avail.opencodeGo) {
         agentConfig = { model: "opencode-go/qwen3.5-plus" }
       } else if (avail.zai) {
         agentConfig = { model: ZAI_MODEL }
+      } else if (preferredMiniMaxModel) {
+        agentConfig = { model: preferredMiniMaxModel }
       } else if (avail.vercelAiGateway) {
         agentConfig = { model: "vercel/minimax/minimax-m2.7" }
       }
       if (agentConfig) {
-        agents[role] = attachAllFallbackModels(agentConfig, req.fallbackChain, avail)
+        agents[role] = attachAllFallbackModels(agentConfig, req.fallbackChain, avail, config)
       }
       continue
     }
 
     if (role === "explore") {
       let agentConfig: AgentConfig
+      const preferredMiniMaxModel = getPreferredMiniMaxModel(avail, config)
       if (avail.native.openai) {
         agentConfig = { model: "openai/gpt-5.4-mini-fast" }
       } else if (avail.native.claude) {
@@ -154,12 +188,14 @@ export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
         agentConfig = { model: "opencode-go/qwen3.5-plus" }
       } else if (avail.copilot) {
         agentConfig = { model: "github-copilot/gpt-5-mini" }
+      } else if (preferredMiniMaxModel) {
+        agentConfig = { model: preferredMiniMaxModel }
       } else if (avail.vercelAiGateway) {
         agentConfig = { model: "vercel/minimax/minimax-m2.7-highspeed" }
       } else {
-        agentConfig = { model: "opencode/gpt-5-nano" }
+        agentConfig = { model: ULTIMATE_FALLBACK }
       }
-      agents[role] = attachAllFallbackModels(agentConfig, req.fallbackChain, avail)
+      agents[role] = attachAllFallbackModels(agentConfig, req.fallbackChain, avail, config)
       continue
     }
 
@@ -171,8 +207,9 @@ export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
       const resolved = resolveModelFromChain(fallbackChain, avail)
       if (resolved) {
         const variant = resolved.variant ?? req.variant
-        const agentConfig = variant ? { model: resolved.model, variant } : { model: resolved.model }
-        agents[role] = attachFallbackModels(agentConfig, fallbackChain, avail)
+        const model = applyMiniMaxVariant(resolved.model, config)
+        const agentConfig = variant ? { model, variant } : { model }
+        agents[role] = attachFallbackModels(agentConfig, fallbackChain, avail, config)
       }
       continue
     }
@@ -187,8 +224,9 @@ export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
     const resolved = resolveModelFromChain(req.fallbackChain, avail)
     if (resolved) {
       const variant = resolved.variant ?? req.variant
-      const agentConfig = variant ? { model: resolved.model, variant } : { model: resolved.model }
-      agents[role] = attachFallbackModels(agentConfig, req.fallbackChain, avail)
+      const model = applyMiniMaxVariant(resolved.model, config)
+      const agentConfig = variant ? { model, variant } : { model }
+      agents[role] = attachFallbackModels(agentConfig, req.fallbackChain, avail, config)
     } else {
       agents[role] = { model: ULTIMATE_FALLBACK }
     }
@@ -211,8 +249,9 @@ export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
     const resolved = resolveModelFromChain(fallbackChain, avail)
     if (resolved) {
       const variant = resolved.variant ?? req.variant
-      const categoryConfig = variant ? { model: resolved.model, variant } : { model: resolved.model }
-      categories[cat] = attachFallbackModels(categoryConfig, fallbackChain, avail)
+      const model = applyMiniMaxVariant(resolved.model, config)
+      const categoryConfig = variant ? { model, variant } : { model }
+      categories[cat] = attachFallbackModels(categoryConfig, fallbackChain, avail, config)
     } else {
       categories[cat] = { model: ULTIMATE_FALLBACK }
     }
@@ -230,5 +269,5 @@ export function generateModelConfig(config: InstallConfig): GeneratedOmoConfig {
 }
 
 export function shouldShowChatGPTOnlyWarning(config: InstallConfig): boolean {
-  return !config.hasClaude && !config.hasGemini && config.hasOpenAI
+  return isOpenAiOnlyAvailability(toProviderAvailability(config))
 }
